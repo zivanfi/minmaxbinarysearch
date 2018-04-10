@@ -5,14 +5,14 @@ import sys
 
 from pprint import pprint
 
-def generare_haystack(haystack_candidates, elem_count):
+def generate_haystack(haystack_candidates, elem_count):
     haystack = []
     for i in range(0, elem_count):
         haystack += [random.choice(haystack_candidates)]
     haystack.sort()
     return haystack
 
-def generare_pages(data, pagesize, truncation_lengths):
+def generate_pages(data, pagesize, truncation_lengths):
     pages = []
     pagecount = 0
     trunc_len = 3
@@ -188,9 +188,9 @@ for search_for_existing_value in [True, False]:
         else:
             needle = random.choice(needle_candidates_not_in_haystack)
         elem_count = random.randint(10, 10000)
-        haystack = generare_haystack(haystack_candidates, elem_count)
+        haystack = generate_haystack(haystack_candidates, elem_count)
         pagesize = random.choice(pagesize_candidates)
-        pages = generare_pages(haystack, pagesize, truncation_lengths)
+        pages = generate_pages(haystack, pagesize, truncation_lengths)
 
         print_number(elem_count)
         print_number(pagesize)
