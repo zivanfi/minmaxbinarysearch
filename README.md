@@ -42,9 +42,13 @@ Cindy, Ed  | C           | F
 Ed, Gus    | E           | H
 Gus        | G           | H
 
-## Problem statement
+## The purpose of this project
 
-This proof of concept demo is meant to demonstrate that 
+This project is meant to demonstrate that filtering pages can be done
+efficiently based on the `min_value` and `max_value` fields as described above.
+In fact, a filtering algorithm based on having lists of `min_value` and
+`max_value` fields that are sorted separately can be almost as efficient as if
+those lists were also sorted in respect to the values from the other list.
 
 Example output:
 
