@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
+import strict_binary_search
+import loose_binary_search
 import random
-import sys
-
-from pprint import pprint
 
 def generate_haystack(haystack_candidates, elem_count):
     haystack = []
@@ -41,145 +40,15 @@ def generate_pages(data, pagesize, truncation_lengths):
         pages += [page]
     return pages
 
-def contains_value(pages, value):
-    for page in pages:
-        for record in page['contents']:
-            if record == value:
-                return True
-    return False
-
-# This algorithm requires that for each page i:
-#   "all values in page i" <= "max value for page i" <= "all values in page i + 1"
-def strict_binary_search(pages, needle):
-
-    first_matching_page_lower_bound = last_matching_page_lower_bound = 0
-    first_matching_page_upper_bound = last_matching_page_upper_bound = len(pages) - 1
-    step_count = 0
-
-    # Look for the first possibly matching page...
-    found = False
-    while not found:
-        if first_matching_page_lower_bound > first_matching_page_upper_bound:
-            break # No matching pages
-        step_count += 1
-        i = (first_matching_page_lower_bound + first_matching_page_upper_bound)//2
-        if needle < pages[i]['stats']['full']['max']:
-            first_matching_page_upper_bound = last_matching_page_upper_bound = i
-        elif needle > pages[i]['stats']['full']['max']:
-            first_matching_page_lower_bound = last_matching_page_lower_bound = i + 1
-        else:
-            first_matching_page_upper_bound = last_matching_page_lower_bound = i
-
-        found = first_matching_page_lower_bound == first_matching_page_upper_bound
-
-    if found:
-        # Look for the last possibly matching page...
-        found = False
-        while not found:
-            if last_matching_page_lower_bound > last_matching_page_upper_bound:
-                break # No matching pages
-            step_count += 1
-            i = (last_matching_page_lower_bound + last_matching_page_upper_bound + 1)//2
-            if needle < pages[i]['stats']['full']['min']:
-                last_matching_page_upper_bound = i - 1
-            else:
-                last_matching_page_lower_bound = i
-
-            found = last_matching_page_lower_bound == last_matching_page_upper_bound
-
-    if found:
-        # Check intersection of the two page ranges (from "first matching" and up to "last matching")
-        found = first_matching_page_lower_bound <= last_matching_page_lower_bound
-
-    if found:
-        # Page interval [first_matching_page_lower_bound, last_matching_page_lower_bound match] matches
-        number_of_matching_pages = last_matching_page_lower_bound - first_matching_page_lower_bound + 1
-        # Sanity check
-        assert not contains_value(pages[:first_matching_page_lower_bound], needle)
-        assert not contains_value(pages[last_matching_page_lower_bound + 1:], needle)
-    else:
-        # No pages match
-        number_of_matching_pages = 0
-        # Sanity check
-        assert not contains_value(pages, needle)
-
-    return number_of_matching_pages, step_count
-
-# This algorithm does NOT require that for each page i:
-#   "all values in page i" <= "max value for page i" <= "all values in page i + 1"
-#
-# Instead, it requires that for each page i:
-#   "min value for page i" <= "all values in page i" <= "max value for page i" and
-#   "min value for page i" <= "min value for page i + 1" and
-#   "max value for page i" <= "max value for page i + 1"
-# This is a looser condition that allows truncating min/max values.
-
-def loose_binary_search(pages, needle, trunc_len):
-    truncation = 'truncated_to_%d' % trunc_len
-
-    first_matching_page_lower_bound = last_matching_page_lower_bound = 0
-    first_matching_page_upper_bound = last_matching_page_upper_bound = len(pages) - 1
-    step_count = 0
-
-
-    # Look for the first possibly matching page...
-    found = False
-    while not found:
-        if first_matching_page_lower_bound > first_matching_page_upper_bound:
-            break # No matching pages
-        step_count += 1
-        i = (first_matching_page_lower_bound + first_matching_page_upper_bound)//2
-        if needle < pages[i]['stats']['full']['min']:
-            first_matching_page_upper_bound = last_matching_page_upper_bound = i
-        elif needle > pages[i]['stats']['full']['max']:
-            first_matching_page_lower_bound = last_matching_page_lower_bound = i + 1
-        else:
-            first_matching_page_upper_bound = last_matching_page_lower_bound = i
-
-        found = first_matching_page_lower_bound == first_matching_page_upper_bound
-
-    if found:
-        # Look for the last possibly matching page...
-        found = False
-        while not found:
-            if last_matching_page_lower_bound > last_matching_page_upper_bound:
-                break # No matching pages
-            step_count += 1
-            i = (last_matching_page_lower_bound + last_matching_page_upper_bound + 1)//2
-            if needle < pages[i]['stats']['full']['min']:
-                last_matching_page_upper_bound = i - 1
-            else:
-                last_matching_page_lower_bound = i
-
-            found = last_matching_page_lower_bound == last_matching_page_upper_bound
-
-    if found:
-        # Check intersection of the two page ranges (from "first matching" and up to "last matching")
-        found = first_matching_page_lower_bound <= last_matching_page_lower_bound
-
-    if found:
-        # Page interval [first_matching_page_lower_bound, last_matching_page_lower_bound match] matches
-        number_of_matching_pages = last_matching_page_lower_bound - first_matching_page_lower_bound + 1
-        # Sanity check
-        assert not contains_value(pages[:first_matching_page_lower_bound], needle)
-        assert not contains_value(pages[last_matching_page_lower_bound + 1:], needle)
-    else:
-        # No pages match
-        number_of_matching_pages = 0
-        # Sanity check
-        assert not contains_value(pages, needle)
-
-    return number_of_matching_pages, step_count
-
 haystack_candidates = ['Amy', 'Bay', 'Ben', 'Dan', 'Eve', 'Gus', 'Ian', 'Ivy', 'Joy', 'Kim', 'Lee', 'Liz', 'Max', 'May', 'Ray', 'Sam', 'Ted', 'Tom', 'Uma']
 needle_candidates_not_in_haystack = ['Ada', 'Bea', 'Eva', 'Fay', 'Ned']
 pagesize_candidates = [2, 10, 100, 1000]
 truncation_lengths = [3, 2, 1]
 
-def print_string(val):
+def pad_string(val):
    print('%10s' % val, end = '')
 
-def print_number(val):
+def pad_number(val):
    print('%10d' % val, end = '')
 
 for search_for_existing_value in [True, False]:
@@ -188,31 +57,31 @@ for search_for_existing_value in [True, False]:
     else:
         print('\nLooking for non-existing values:')
 
-    print_string('elemcount')
-    print_string('pagesize')
-    print_string('pagecount')
-    print_string('')
-    print_string('steps')
+    pad_string('elemcount')
+    pad_string('pagesize')
+    pad_string('pagecount')
+    pad_string('')
+    pad_string('steps')
     for i in truncation_lengths:
-        print_string('steps')
+        pad_string('steps')
     print('%20s' % 'matches', end = '')
     for i in truncation_lengths:
-        print_string('matches')
+        pad_string('matches')
     print()
 
-    print_string('')
-    print_string('')
-    print_string('')
-    print_string('')
-    print_string('(full)')
+    pad_string('')
+    pad_string('')
+    pad_string('')
+    pad_string('')
+    pad_string('(full)')
     for i in truncation_lengths:
         truncation = '(trunc%d)' % i
-        print_string(truncation)
-    print_string('')
-    print_string('(full)')
+        pad_string(truncation)
+    pad_string('')
+    pad_string('(full)')
     for i in truncation_lengths:
         truncation = '(trunc%d)' % i
-        print_string(truncation)
+        pad_string(truncation)
     print()
 
     for i in range(0, 15):
@@ -225,27 +94,27 @@ for search_for_existing_value in [True, False]:
         pagesize = random.choice(pagesize_candidates)
         pages = generate_pages(haystack, pagesize, truncation_lengths)
 
-        print_number(elem_count)
-        print_number(pagesize)
-        print_number(len(pages))
-        print_string('')
+        pad_number(elem_count)
+        pad_number(pagesize)
+        pad_number(len(pages))
+        pad_string('')
 
         number_of_matching_pages = {}
         step_count = {}
-        (number_of_matching_pages['full'], step_count['full']) = strict_binary_search(pages, needle)
+        (number_of_matching_pages['full'], step_count['full']) = strict_binary_search.filter_pages(pages, needle)
         for i in truncation_lengths:
             truncation = 'truncated_to_%d' % i
-            (number_of_matching_pages[truncation], step_count[truncation]) = loose_binary_search(pages, needle, i)
+            (number_of_matching_pages[truncation], step_count[truncation]) = loose_binary_search.filter_pages(pages, needle, i)
 
-        print_number(step_count['full'])
+        pad_number(step_count['full'])
         for i in truncation_lengths:
             truncation = 'truncated_to_%d' % i
-            print_number(step_count[truncation])
+            pad_number(step_count[truncation])
 
-        print_string('')
-        print_number(number_of_matching_pages['full'])
+        pad_string('')
+        pad_number(number_of_matching_pages['full'])
         for i in truncation_lengths:
             truncation = 'truncated_to_%d' % i
-            print_number(number_of_matching_pages[truncation])
+            pad_number(number_of_matching_pages[truncation])
 
         print()
