@@ -1,5 +1,51 @@
 # minmaxbinarysearch
 
+## Background
+
+### `min_value` and `max_value`
+
+The specification for the `min_value` and `max_value` fields of Parquet allows
+these values to be different from the actual smallest and largest numbers as
+long as the real-min to real-max range is contained within the `min_value` to
+`max_value` range. In other words, the `min_value` to `max_value` range must not
+tightly fit around the data, but it can be made larger instead.
+
+This allows truncating values. For example, suppose a page contains the
+following two values:
+
+* Blart Versenwald III
+* Slartibartfast
+
+In this case, the smallest value is "Blart Versenwald III", but the
+`min_value` field can store a shorter string than that. A simple truncation
+gives a valid `min_value`, to name a few possibilites, one may use "Bla", "Bl"
+or "B".
+
+The largest value is "Slartibartfast". This can also be shortened, but special
+care must be taken to make this shorter value larger than the actual value. A
+few feasible choices for `max_value` are: "Slb", "Sm" or "T".
+
+### Sorted data
+
+If data is sorted, the actual min and max values will naturally be sorted as
+well. This property, however, is not true for shortened values. On the other
+hand, if the shortening is done consistently, it is very easy to achieve a
+looser condition as follows: the list of `min_values` can keep the correct order
+and the list of `max_values` can also keep the correct order. For example:
+
+Values     | `min_value` | `max_value`
+-----------|-------------|-------------
+Ann, Ann   | A           | B
+Ann, Bob   | A           | C
+Bob, Cindy | B           | D
+Cindy, Ed  | C           | F
+Ed, Gus    | E           | H
+Gus        | G           | H
+
+## Problem statement
+
+This proof of concept demo is meant to demonstrate that 
+
 Example output:
 
     Looking for existing values:
