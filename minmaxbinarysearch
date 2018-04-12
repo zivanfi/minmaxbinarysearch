@@ -57,25 +57,41 @@ def strict_binary_search(pages, needle):
     step_count = 0
 
     # Look for the first possibly matching page...
-    while first_matching_page_lower_bound < first_matching_page_upper_bound:
+    found = False
+    while not found:
+        if first_matching_page_lower_bound > first_matching_page_upper_bound:
+            break # No matching pages
         step_count += 1
         i = (first_matching_page_lower_bound + first_matching_page_upper_bound)//2
-        if pages[i]['stats']['full']['max'] > needle:
+        if needle < pages[i]['stats']['full']['max']:
             first_matching_page_upper_bound = last_matching_page_upper_bound = i
-        elif pages[i]['stats']['full']['max'] < needle:
+        elif needle > pages[i]['stats']['full']['max']:
             first_matching_page_lower_bound = last_matching_page_lower_bound = i + 1
         else:
             first_matching_page_upper_bound = last_matching_page_lower_bound = i
 
-    if first_matching_page_lower_bound == first_matching_page_upper_bound:
-        while last_matching_page_lower_bound < last_matching_page_upper_bound:
-            step_count += 1
-            i = (last_matching_page_lower_bound + last_matching_page_upper_bound)//2
-            if pages[i]['stats']['full']['max'] > needle:
-                last_matching_page_upper_bound = i
-            else:
-                last_matching_page_lower_bound = i + 1
+        found = first_matching_page_lower_bound == first_matching_page_upper_bound
 
+    if found:
+        # Look for the last possibly matching page...
+        found = False
+        while not found:
+            if last_matching_page_lower_bound > last_matching_page_upper_bound:
+                break # No matching pages
+            step_count += 1
+            i = (last_matching_page_lower_bound + last_matching_page_upper_bound + 1)//2
+            if needle < pages[i]['stats']['full']['min']:
+                last_matching_page_upper_bound = i - 1
+            else:
+                last_matching_page_lower_bound = i
+
+            found = last_matching_page_lower_bound == last_matching_page_upper_bound
+
+    if found:
+        # Check intersection of the two page ranges (from "first matching" and up to "last matching")
+        found = first_matching_page_lower_bound <= last_matching_page_lower_bound
+
+    if found:
         # Page interval [first_matching_page_lower_bound, last_matching_page_lower_bound match] matches
         number_of_matching_pages = last_matching_page_lower_bound - first_matching_page_lower_bound + 1
         # Sanity check
@@ -105,26 +121,43 @@ def loose_binary_search(pages, needle, trunc_len):
     first_matching_page_upper_bound = last_matching_page_upper_bound = len(pages) - 1
     step_count = 0
 
+
     # Look for the first possibly matching page...
-    while first_matching_page_lower_bound < first_matching_page_upper_bound:
+    found = False
+    while not found:
+        if first_matching_page_lower_bound > first_matching_page_upper_bound:
+            break # No matching pages
         step_count += 1
         i = (first_matching_page_lower_bound + first_matching_page_upper_bound)//2
-        if pages[i]['stats'][truncation]['min'] > needle:
+        if needle < pages[i]['stats']['full']['min']:
             first_matching_page_upper_bound = last_matching_page_upper_bound = i
-        elif pages[i]['stats'][truncation]['max'] < needle:
+        elif needle > pages[i]['stats']['full']['max']:
             first_matching_page_lower_bound = last_matching_page_lower_bound = i + 1
         else:
             first_matching_page_upper_bound = last_matching_page_lower_bound = i
 
-    if first_matching_page_lower_bound == first_matching_page_upper_bound:
-        while last_matching_page_lower_bound < last_matching_page_upper_bound:
+        found = first_matching_page_lower_bound == first_matching_page_upper_bound
+
+    if found:
+        # Look for the last possibly matching page...
+        found = False
+        while not found:
+            if last_matching_page_lower_bound > last_matching_page_upper_bound:
+                break # No matching pages
             step_count += 1
-            i = (last_matching_page_lower_bound + last_matching_page_upper_bound)//2
-            if pages[i]['stats'][truncation]['min'] > needle:
+            i = (last_matching_page_lower_bound + last_matching_page_upper_bound + 1)//2
+            if needle < pages[i]['stats']['full']['min']:
                 last_matching_page_upper_bound = i - 1
             else:
-                last_matching_page_lower_bound = i + 1
+                last_matching_page_lower_bound = i
 
+            found = last_matching_page_lower_bound == last_matching_page_upper_bound
+
+    if found:
+        # Check intersection of the two page ranges (from "first matching" and up to "last matching")
+        found = first_matching_page_lower_bound <= last_matching_page_lower_bound
+
+    if found:
         # Page interval [first_matching_page_lower_bound, last_matching_page_lower_bound match] matches
         number_of_matching_pages = last_matching_page_lower_bound - first_matching_page_lower_bound + 1
         # Sanity check
