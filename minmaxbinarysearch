@@ -4,87 +4,39 @@ import strict_binary_search
 import loose_binary_search
 import random
 
-def generate_haystack(haystack_candidates, elem_count):
-    haystack = []
-    for i in range(0, elem_count):
-        haystack += [random.choice(haystack_candidates)]
-    haystack.sort()
-    return haystack
+from generator import *
+from printer import *
 
-def generate_pages(data, pagesize, truncation_lengths):
-    pages = []
-    pagecount = 0
-    trunc_len = 3
-    for i in range(0, len(haystack), pagesize):
-        page = {}
-        page['id'] = pagecount
-        pagecount += 1
-        page['contents'] = haystack[i:i+pagesize]
-        stats = {}
-        stats['full'] = {}
-        stats['full']['min'] = min(page['contents'])
-        stats['full']['max'] = max(page['contents'])
-        for trunc_len in truncation_lengths:
-            truncation = 'truncated_to_%d' % trunc_len
-            stats[truncation] = {}
-            if len(stats['full']['min']) > trunc_len:
-                stats[truncation]['min'] = stats['full']['min'][:trunc_len]
-            else:
-                stats[truncation]['min'] = stats['full']['min']
-
-            if len(stats['full']['max']) > trunc_len:
-                stats[truncation]['max'] = stats['full']['max'][:trunc_len - 1] + chr(ord(stats['full']['max'][trunc_len - 1]) + 1)
-            else:
-                stats[truncation]['max'] = stats['full']['max']
-        page['stats'] = stats
-        pages += [page]
-    return pages
-
+# Parameters controlling what exactly gets tested.
 haystack_candidates = ['Amy', 'Bay', 'Ben', 'Dan', 'Eve', 'Gus', 'Ian', 'Ivy', 'Joy', 'Kim', 'Lee', 'Liz', 'Max', 'May', 'Ray', 'Sam', 'Ted', 'Tom', 'Uma']
 needle_candidates_not_in_haystack = ['Ada', 'Bea', 'Eva', 'Fay', 'Ned']
 pagesize_candidates = [2, 10, 100, 1000]
 truncation_lengths = [3, 2, 1]
+execution_target_count = 5000
+verbose_execution_limit = 10
 
-def pad_string(val):
-   print('%10s' % val, end = '')
+truncation_specs = [ 'truncated_to_%d' % i for i in truncation_lengths ]
 
-def pad_number(val):
-   print('%10d' % val, end = '')
+# Set up some global counters for averages.
+total_step_count = {}
+total_number_of_matching_pages = {}
+execution_count = 0
+for selector in ['full'] + truncation_specs:
+    total_step_count[selector] = 0
+    total_number_of_matching_pages[selector] = 0
 
+# Test searching for existing and non-existing values separately.
 for search_for_existing_value in [True, False]:
     if search_for_existing_value:
         print('\nLooking for existing values:')
     else:
         print('\nLooking for non-existing values:')
 
-    pad_string('elemcount')
-    pad_string('pagesize')
-    pad_string('pagecount')
-    pad_string('')
-    pad_string('steps')
-    for i in truncation_lengths:
-        pad_string('steps')
-    print('%20s' % 'matches', end = '')
-    for i in truncation_lengths:
-        pad_string('matches')
-    print()
+    print_table_header(truncation_lengths)
 
-    pad_string('')
-    pad_string('')
-    pad_string('')
-    pad_string('')
-    pad_string('(full)')
-    for i in truncation_lengths:
-        truncation = '(trunc%d)' % i
-        pad_string(truncation)
-    pad_string('')
-    pad_string('(full)')
-    for i in truncation_lengths:
-        truncation = '(trunc%d)' % i
-        pad_string(truncation)
-    print()
-
-    for i in range(0, 15):
+    # Execute a random search execution_target_count times.
+    for execution_count in range(0, execution_target_count + 1):
+        # Pick random search parameters based on the parameters.
         if search_for_existing_value:
             needle = random.choice(haystack_candidates)
         else:
@@ -94,27 +46,52 @@ for search_for_existing_value in [True, False]:
         pagesize = random.choice(pagesize_candidates)
         pages = generate_pages(haystack, pagesize, truncation_lengths)
 
-        pad_number(elem_count)
-        pad_number(pagesize)
-        pad_number(len(pages))
-        pad_string('')
-
+        # Set up vars for the results and do the actual search.
         number_of_matching_pages = {}
         step_count = {}
         (number_of_matching_pages['full'], step_count['full']) = strict_binary_search.filter_pages(pages, needle)
-        for i in truncation_lengths:
-            truncation = 'truncated_to_%d' % i
-            (number_of_matching_pages[truncation], step_count[truncation]) = loose_binary_search.filter_pages(pages, needle, i)
+        total_number_of_matching_pages['full'] += number_of_matching_pages['full']
+        total_step_count['full'] += step_count['full']
+        for truncation in truncation_specs:
+            (number_of_matching_pages[truncation], step_count[truncation]) = loose_binary_search.filter_pages(pages, needle, truncation)
+            total_number_of_matching_pages[truncation] += number_of_matching_pages[truncation]
+            total_step_count[truncation] += step_count[truncation]
 
-        pad_number(step_count['full'])
-        for i in truncation_lengths:
-            truncation = 'truncated_to_%d' % i
-            pad_number(step_count[truncation])
+        # Only print up to verbose_execution_limit results.
+        if execution_count < verbose_execution_limit:
+            print_padded_integer(execution_count)
+            print_padded_integer(elem_count)
+            print_padded_integer(pagesize)
+            print_padded_integer(len(pages))
+            print_padded_string('')
 
-        pad_string('')
-        pad_number(number_of_matching_pages['full'])
-        for i in truncation_lengths:
-            truncation = 'truncated_to_%d' % i
-            pad_number(number_of_matching_pages[truncation])
+            for selector in ['full'] + truncation_specs:
+                print_padded_integer(step_count[selector])
 
-        print()
+            print_padded_string('')
+
+            for selector in ['full'] + truncation_specs:
+                print_padded_integer(number_of_matching_pages[selector])
+
+            print()
+
+    if verbose_execution_limit < execution_count:
+        print('[%d executions omitted]' % (execution_count - verbose_execution_limit))
+    print('-' * 140)
+
+    # Print averages.
+    print_padded_string('average')
+    print_padded_string('')
+    print_padded_string('')
+    print_padded_string('')
+    print_padded_string('')
+
+    for selector in ['full'] + truncation_specs:
+        print_padded_float(total_step_count[selector]/execution_count)
+
+    print_padded_string('')
+
+    for selector in ['full'] + truncation_specs:
+        print_padded_float(total_number_of_matching_pages[selector]/execution_count)
+
+    print()

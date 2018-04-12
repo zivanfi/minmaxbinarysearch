@@ -9,9 +9,7 @@ from common import *
 #   "max value for page i" <= "max value for page i + 1"
 # This is a looser condition that allows truncating min/max values.
 
-def filter_pages(pages, needle, trunc_len):
-    truncation = 'truncated_to_%d' % trunc_len
-
+def filter_pages(pages, needle, truncation):
     first_matching_page_lower_bound = last_matching_page_lower_bound = 0
     first_matching_page_upper_bound = last_matching_page_upper_bound = len(pages) - 1
     step_count = 0
