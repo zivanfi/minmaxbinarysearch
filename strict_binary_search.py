@@ -1,7 +1,7 @@
 from common import *
 
 # This algorithm requires that for each page i:
-#   "all values in page i" <= "max value for page i" <= "all values in page i + 1"
+#   "max value for page i" <= "min value for page i + 1"
 def filter_pages(pages, needle):
 
     first_matching_page_lower_bound = last_matching_page_lower_bound = 0

@@ -7,33 +7,52 @@ def print_padded_integer(val):
 def print_padded_float(val):
    print('%10.2f' % val, end = '')
 
-def print_table_header(truncation_lengths):
+def print_table_header(truncations):
     print_padded_string('')
     print_padded_string('')
     print_padded_string('')
     print_padded_string('')
-    print_padded_string('')
+    print_padded_string('metric:')
     print_padded_string('steps')
-    for i in truncation_lengths:
+    for i in truncations:
         print_padded_string('steps')
-    print('%20s' % 'matches', end = '')
-    for i in truncation_lengths:
+    print_padded_string('')
+    print_padded_string('matches')
+    for i in truncations:
         print_padded_string('matches')
+    print()
+
+    print_padded_string('')
+    print_padded_string('')
+    print_padded_string('')
+    print_padded_string('')
+    print_padded_string('algorithm:')
+    print_padded_string('strict')
+    for i in truncations:
+        print_padded_string('loose')
+    print_padded_string('')
+    print_padded_string('strict')
+    for i in truncations:
+        print_padded_string('loose')
+    print()
+
+    print_padded_string('')
+    print_padded_string('')
+    print_padded_string('')
+    print_padded_string('')
+    print_padded_string('stat len:')
+    print_padded_string('N/A')
+    for selector in truncations:
+        print_padded_string(selector)
+    print_padded_string('')
+    print_padded_string('N/A')
+    for selector in truncations:
+        print_padded_string(selector)
     print()
 
     print_padded_string('execution')
     print_padded_string('elemcount')
     print_padded_string('pagesize')
     print_padded_string('pagecount')
-    print_padded_string('')
-    print_padded_string('(full)')
-    for i in truncation_lengths:
-        truncation = '(trunc%d)' % i
-        print_padded_string(truncation)
-    print_padded_string('')
-    print_padded_string('(full)')
-    for i in truncation_lengths:
-        truncation = '(trunc%d)' % i
-        print_padded_string(truncation)
     print()
-    print('-' * 140)
+    print('-' * 10 * (8 + 2 * len(truncations)))

@@ -50,40 +50,64 @@ In fact, a filtering algorithm based on having lists of `min_value` and
 `max_value` fields that are sorted separately can be almost as efficient as if
 those lists were also sorted in respect to the values from the other list.
 
+The script generates multiple datasets by picking random names from a fixed set
+of candidates with random weights. A given name and a family name is chosen
+independently and concatenated to form a single value of the dataset. The values
+are stored in pages that have a different random value count in every dataset.
+Finally, another random name is chosen and the pages are searched for potential
+matches.
+
+Two metrics are collected:
+
+* steps: The number of steps the search algorithm took.
+
+* matches: The number of pages identified as potentially matching.
+
+Two algorithms are compared:
+
+* strict: The min and max values are the actual smallest and largest values of a
+  page (respectively). The binary search builds on the assumption that
+  * "min value for page i" <= "all values in page i" <= "max value for page i" and
+  * "max value for page i" <= "min value for page i + 1"
+
+* loose: The min/max values are allowed to be smaller/larger (respectively) than
+  the actual smallest/largest (respectively) values of a page. The binary search
+  builds on the looser assumption that:
+
+  * "min value for page i" <= "all values in page i" <= "max value for page i" and
+  * "min value for page i" <= "min value for page i + 1" and
+  * "max value for page i" <= "max value for page i + 1"
+
+  Since the loose algorithm allows truncation of min/max values, different
+  truncation lengths are also compared.
+
 Example output:
 
-    Looking for existing values:
-                                                           steps     steps     steps     steps             matches   matches   matches   matches
-     execution elemcount  pagesize pagecount              (full)  (trunc3)  (trunc2)  (trunc1)              (full)  (trunc3)  (trunc2)  (trunc1)
+                                               metric:     steps     steps     steps     steps     steps             matches   matches   matches   matches   matches
+                                            algorithm:    strict     loose     loose     loose     loose              strict     loose     loose     loose     loose
+                                             stat len:       N/A      full  trunc_10   trunc_5   trunc_2                 N/A      full  trunc_10   trunc_5   trunc_2
+     execution elemcount  pagesize pagecount
+    ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+             0      5845      1000         6                   4         4         4         4         4                   1         1         1         1         1
+             1      4507       100        46                   7         7         7         8         8                   1         1         1         2         3
+             2      9064      1000        10                   4         5         5         5         5                   1         1         1         1         1
+             3      9480      1000        10                   4         4         4         4         4                   1         1         1         1         1
+             4      1620       100        17                   5         5         5         5         5                   1         1         1         1         1
+             5       176        10        18                   5         5         5         5         6                   0         0         0         0         1
+             6      3302      1000         4                   3         3         3         3         3                   1         1         1         1         1
+             7      3586         2      1793                  12        12        12        16        16                   0         0         1         5        18
+             8      4908         2      2454                  12        12        12        14        16                   0         0         1         3        15
+             9      5691       100        57                   7         8         8         8         8                   1         1         1         1         1
+            10      5825      1000         6                   4         4         4         4         4                   1         1         1         1         1
+            11      4215        10       422                  10        10        11        11        12                   1         1         2         2         5
+            12      1883       100        19                   5         5         5         5         5                   1         1         1         1         1
+            13      3742        10       375                   9        10        10        10        10                   1         1         1         1         1
+            14      3651        10       366                  10        10        10        11        14                   0         0         0         2        11
+            15      5398         2      2699                  12        17        17        17        18                   1         1        13        13       121
+            16      3565        10       357                  10        10        10        10        14                   1         1         1         1        11
+            17      3582      1000         4                   3         3         3         3         3                   1         1         1         1         1
+            18      9002         2      4501                  13        13        13        16        20                   0         0         0         5        60
+            19      8914         2      4457                  13        13        13        13        16                   1         1         1         1         9
+    [4980 executions omitted]
     --------------------------------------------------------------------------------------------------------------------------------------------
-             0      3600        10       360                  15        15        15        15                  18        18        18        37
-             1      1324        10       133                  11        11        11        12                   7         7         7        14
-             2      9637         2      4819                  20        20        20        22                 262       262       262       495
-             3      7518      1000         8                   4         5         5         5                   1         1         1         1
-             4      2609        10       261                  12        12        12        14                  17        17        17        29
-             5      7535       100        76                   9         9         9         9                   5         5         5         5
-             6       126      1000         1                   2         2         2         2                   1         1         1         1
-             7      4502      1000         5                   4         4         4         4                   1         1         1         1
-             8      2240      1000         3                   3         3         3         3                   1         1         1         1
-             9      6598       100        66                  10        10        10        10                   5         5         5         8
-    [4990 executions omitted]
-    --------------------------------------------------------------------------------------------------------------------------------------------
-       average                                             10.90     11.02     11.07     11.29               39.35     39.35     43.67     59.18
-    
-    Looking for non-existing values:
-                                                           steps     steps     steps     steps             matches   matches   matches   matches
-     execution elemcount  pagesize pagecount              (full)  (trunc3)  (trunc2)  (trunc1)              (full)  (trunc3)  (trunc2)  (trunc1)
-    --------------------------------------------------------------------------------------------------------------------------------------------
-             0      9428      1000        10                   5         5         5         6                   1         1         1         2
-             1      1688        10       169                   9         9         9        12                   0         0         0        10
-             2       448         2       224                   8        10        13        13                   1         1        15        15
-             3       142       100         2                   2         2         2         2                   1         1         1         1
-             4      8265        10       827                  11        11        11        16                   0         0         0        45
-             5      3825      1000         4                   3         3         3         3                   1         1         1         1
-             6      7688        10       769                  11        11        11        11                   1         1         1         1
-             7      2490         2      1245                  11        11        11        11                   1         1         1         1
-             8      8702        10       871                  11        11        11        16                   0         0         0        47
-             9       760       100         8                   4         4         4         4                   0         0         0         1
-    [4990 executions omitted]
-    --------------------------------------------------------------------------------------------------------------------------------------------
-       average                                             18.75     19.03     20.54     21.38               40.03     40.03     59.80     91.52
+       average                        747.44                7.73      7.99      8.20      9.03      9.91                0.86      0.86      1.34      3.66     12.89

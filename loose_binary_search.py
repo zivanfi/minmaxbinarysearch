@@ -1,10 +1,9 @@
 from common import *
 
 # This algorithm does NOT require that for each page i:
-#   "all values in page i" <= "max value for page i" <= "all values in page i + 1"
+#   "max value for page i" <= "min value for page i + 1"
 #
 # Instead, it requires that for each page i:
-#   "min value for page i" <= "all values in page i" <= "max value for page i" and
 #   "min value for page i" <= "min value for page i + 1" and
 #   "max value for page i" <= "max value for page i + 1"
 # This is a looser condition that allows truncating min/max values.
