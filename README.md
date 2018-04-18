@@ -30,8 +30,8 @@ few feasible choices for `max_value` are: "Slb", "Sm" or "T".
 If data is sorted, the actual min and max values will naturally be sorted as
 well. This property, however, is not true for shortened values. On the other
 hand, if the shortening is done consistently, it is very easy to achieve a
-looser condition as follows: the list of `min_values` and the list of
-`max_values` can keep the correct order _separately_. For example:
+looser condition that the list of `min_values` and the list of `max_values`
+remain sorted _separately_. For example:
 
 Values     | `min_value` | `max_value`
 -----------|-------------|-------------
