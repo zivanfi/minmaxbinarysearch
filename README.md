@@ -8,7 +8,7 @@ The specification for the `min_value` and `max_value` fields of Parquet allows
 these values to be different from the actual smallest and largest numbers as
 long as the real-min to real-max range is contained within the `min_value` to
 `max_value` range. In other words, the `min_value` to `max_value` range does not
-have to tightly fit around the data, but it can be made broader instead.
+have to fit tightly around the data, but it can be made broader instead.
 
 This definition allows truncating the `min_value` and `max_value` fields. For
 example, suppose a page contains the following two values:
@@ -30,8 +30,8 @@ few feasible choices for `max_value` are: "Slb", "Sm" or "T".
 If data is sorted, the actual min and max values will naturally be sorted as
 well. This property, however, is not true for shortened values. On the other
 hand, if the shortening is done consistently, it is very easy to achieve a
-looser condition as follows: the list of `min_values` can keep the correct order
-and the list of `max_values` can also keep the correct order. For example:
+looser condition as follows: the list of `min_values` and the list of
+`max_values` can keep the correct order _separately_. For example:
 
 Values     | `min_value` | `max_value`
 -----------|-------------|-------------
