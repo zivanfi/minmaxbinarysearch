@@ -7,14 +7,14 @@
 The specification for the `min_value` and `max_value` fields of Parquet allows
 these values to be different from the actual smallest and largest numbers as
 long as the real-min to real-max range is contained within the `min_value` to
-`max_value` range. In other words, the `min_value` to `max_value` range must not
-tightly fit around the data, but it can be made larger instead.
+`max_value` range. In other words, the `min_value` to `max_value` range does not
+have to tightly fit around the data, but it can be made broader instead.
 
-This allows truncating values. For example, suppose a page contains the
-following two values:
+This definition allows truncating the `min_value` and `max_value` fields. For
+example, suppose a page contains the following two values:
 
-* Blart Versenwald III
-* Slartibartfast
+* "Blart Versenwald III"
+* "Slartibartfast"
 
 In this case, the smallest value is "Blart Versenwald III", but the
 `min_value` field can store a shorter string than that. A simple truncation
