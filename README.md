@@ -67,16 +67,16 @@ Two algorithms are compared:
 
 * strict: The min and max values are the actual smallest and largest values of a
   page (respectively). The binary search builds on the assumption that
-  * "min value for page i" <= "all values in page i" <= "max value for page i" and
-  * "max value for page i" <= "min value for page i + 1"
+  * `min value for page i` <= `all values in page i` <= `max value for page i` and
+  * `max value for page i` <= `min value for page i + 1`
 
 * loose: The min/max values are allowed to be smaller/larger (respectively) than
   the actual smallest/largest (respectively) values of a page. The binary search
   builds on the looser assumption that:
 
-  * "min value for page i" <= "all values in page i" <= "max value for page i" and
-  * "min value for page i" <= "min value for page i + 1" and
-  * "max value for page i" <= "max value for page i + 1"
+  * `min value for page i` <= `all values in page i` <= `max value for page i` and
+  * `min value for page i` <= `min value for page i + 1` and
+  * `max value for page i` <= `max value for page i + 1`
 
   Since the loose algorithm allows truncation of min/max values, different
   truncation lengths are also compared.
