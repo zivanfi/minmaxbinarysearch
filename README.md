@@ -59,18 +59,18 @@ matches.
 
 Two metrics are collected:
 
-* steps: The number of steps the search algorithm took.
+* `steps`: The number of steps the search algorithm took.
 
-* matches: The number of pages identified as potentially matching.
+* `matches`: The number of pages identified as potentially matching.
 
 Two algorithms are compared:
 
-* strict: The min and max values are the actual smallest and largest values of a
+* `strict`: The min and max values are the actual smallest and largest values of a
   page (respectively). The binary search builds on the assumption that
   * `min value for page i` <= `all values in page i` <= `max value for page i` and
   * `max value for page i` <= `min value for page i + 1`
 
-* loose: The min/max values are allowed to be smaller/larger (respectively) than
+* `loose`: The min/max values are allowed to be smaller/larger (respectively) than
   the actual smallest/largest (respectively) values of a page. The binary search
   builds on the looser assumption that:
 
@@ -111,3 +111,24 @@ Example output:
     [4980 executions omitted]
     --------------------------------------------------------------------------------------------------------------------------------------------
        average                        747.44                7.73      7.99      8.20      9.03      9.91                0.86      0.86      1.34      3.66     12.89
+
+The example above shows that using the same min and max values, the strict vs.
+the loose algorithm took 7.73 vs. 7.99 steps on average to execute. A truncation
+of the min/max values (only allowed by the loose algorithm) to a length of 10, 5
+and 2 characters increased the average step count to 8.20, 9.03 and 9.91,
+respectively.
+
+The example above also shows that on average, each data set contained 747.44
+pages. Using the same min and max values, both the strict and the loose
+algorithms returned 0.86 potentially matching pages. A truncation of the min/max
+values (only allowed by the loose algorithm) to a length of 10, 5 and 2
+characters increased the number of pages returned to 1.34, 3.66 and 12.89,
+respectively.
+
+## Conclusion
+
+As expected, the loose algorithm may take more steps and may return more
+potential pages than the strict algorithm. However, the difference is not
+significant enough to justify supporting both algorithms and the space saving
+opportunities allowed by the loose algorithm easily outweigh its slight
+performance disadvantage in my opinion.
