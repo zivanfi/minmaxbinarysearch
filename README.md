@@ -129,6 +129,6 @@ respectively.
 
 As expected, the loose algorithm may take more steps and may return more
 potential pages than the strict algorithm. However, the difference is not
-significant enough to justify supporting both algorithms and the space saving
-opportunities allowed by the loose algorithm easily outweigh its slight
-performance disadvantage in my opinion.
+significant enough to justify supporting both algorithms and in my opinion the
+space saving opportunities allowed by the loose algorithm easily outweigh its
+slight performance disadvantage.
