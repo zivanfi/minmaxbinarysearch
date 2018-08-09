@@ -109,20 +109,20 @@ Example output:
             18      9002         2      4501                  13        13        13        16        20                   0         0         0         5        60
             19      8914         2      4457                  13        13        13        13        16                   1         1         1         1         9
     [4980 executions omitted]
-    --------------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------------------------------
        average                        747.44                7.73      7.99      8.20      9.03      9.91                0.86      0.86      1.34      3.66     12.89
 
-The example above shows that using the same min and max values, the strict vs.
-the loose algorithm took 7.73 vs. 7.99 steps on average to execute. A truncation
-of the min/max values (only allowed by the loose algorithm) to a length of 10, 5
-and 2 characters increased the average step count to 8.20, 9.03 and 9.91,
-respectively.
+The example above generated 5000 data sets and the last line shows that using
+the same min and max values, the strict vs. the loose algorithm took 7.73 vs.
+7.99 steps on average to execute. A truncation of the min/max values (only
+allowed by the loose algorithm) to a length of 10, 5 and 2 characters increased
+the average step count to 8.20, 9.03 and 9.91, respectively.
 
-The example above also shows that on average, each data set contained 747.44
-pages. Using the same min and max values, both the strict and the loose
-algorithms returned 0.86 potentially matching pages. A truncation of the min/max
-values (only allowed by the loose algorithm) to a length of 10, 5 and 2
-characters increased the number of pages returned to 1.34, 3.66 and 12.89,
+The last line of the example above also shows that on average, each data set
+contained 747.44 pages. Using the same min and max values, both the strict and
+the loose algorithms returned 0.86 potentially matching pages. A truncation of
+the min/max values (only allowed by the loose algorithm) to a length of 10, 5
+and 2 characters increased the number of pages returned to 1.34, 3.66 and 12.89,
 respectively.
 
 ## Conclusion

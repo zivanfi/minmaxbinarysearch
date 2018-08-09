@@ -10,7 +10,7 @@ from printer import *
 # Parameters controlling what exactly gets tested.
 pagesize_candidates = [2, 10, 100, 1000]
 truncation_lengths = [10, 5, 2]
-execution_target_count = 5000
+execution_target_count = 100
 verbose_execution_limit = 20
 min_record_count = 10
 max_record_count = 10000
@@ -144,9 +144,9 @@ for execution_count in range(0, execution_target_count + 1):
 
 if verbose_execution_limit < execution_count:
     print('[%d executions omitted]' % (execution_count - verbose_execution_limit))
-print('-' * 140)
 
 # Print averages.
+print('-' * 10 * (8 + 2 * len(truncation_specs)))
 print_padded_string('average')
 print_padded_string('')
 print_padded_string('')

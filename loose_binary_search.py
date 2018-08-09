@@ -21,7 +21,7 @@ def filter_pages(pages, needle, truncation):
         step_count += 1
         i = (first_matching_page_lower_bound + first_matching_page_upper_bound)//2
         if needle < pages[i]['stats'][truncation]['min']:
-            first_matching_page_upper_bound = last_matching_page_upper_bound = i
+            first_matching_page_upper_bound = last_matching_page_upper_bound = i - 1
         elif needle > pages[i]['stats'][truncation]['max']:
             first_matching_page_lower_bound = last_matching_page_lower_bound = i + 1
         else:
